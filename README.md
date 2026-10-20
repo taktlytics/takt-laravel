@@ -54,6 +54,7 @@ This writes `config/takt.php`. All values are environment-driven:
 | `TAKT_ENABLED`           | `null`                      | Kill-switch: set to `false` to disable tracking entirely.               |
 | `TAKT_REDACT_ROUTES`     | `''`                        | Comma-separated sensitive routes sent as their pattern (e.g. `/verify/{token},/reset/{code}`). Snippet requires `TAKT_MODE=sdk`. See [Route redaction](#route-redaction). |
 | `TAKT_ROUTE_TEMPLATES`   | `false`                     | Send every page as its Laravel route template (`/users/{id}`). Snippet requires `TAKT_MODE=sdk`. See [Route redaction](#route-redaction). |
+| `TAKT_REDACT_UNDECODABLE_PATHS` | `true`                | Server-side events only: `false` matches a path that cannot be decoded like any other instead of masking it as `/[redacted]`. See [Route redaction](#route-redaction). |
 | `TAKT_SCRUB_URL`         | `null`                      | Raw JS function to rewrite URLs before sending, e.g. `(u) => u.split('#')[0]`. **Requires `TAKT_MODE=sdk` and is dev-controlled only**. It is injected verbatim into the page; never build it from user input. |
 
 Example `.env`:
@@ -150,9 +151,28 @@ other modes cannot honor them, so the `SnippetRenderer` throws.
 
 `redact_routes` lists the sensitive routes. A matching path is sent as the pattern, every other path
 keeps its real value. Patterns accept the Laravel syntax (`{token}`, `{page?}`) as well as
-`[param]`, `[[optional]]`, `[...rest]`, `:param`, `*` and `**`. The browser SDK reads `{token}` as
-`[token]`, so a browser pageview reports `/verify/[token]` where a server event reports
-`/verify/{token}`; write `/verify/[token]` if both must land on the same row.
+`[param]`, `[[optional]]`, `[...rest]`, `:param`, `:param?`, `*`, `**`, `*name`, `:name*` and `:name+`.
+The browser SDK reads `{token}` as `[token]`, so a browser pageview reports `/verify/[token]` where a
+server event reports `/verify/{token}`; write `/verify/[token]` if both must land on the same row.
+
+A parameter can carry a regex constraint, `{id<\d+>}`, which must match the whole segment
+(case-insensitively). The regex follows a restricted grammar, the same in the PHP and JavaScript
+SDKs: alternation only at the top level, literals, `.`, `\d \D \w \W \s \S`, escaped ASCII
+punctuation, classes `[...]` without nesting, and quantifiers bounded to 100. Groups, lookarounds,
+backreferences, anchors and `/` are refused, and the grammar counts bytes, not characters. A
+constrained parameter keeps its brace form in the browser, so the browser needs an SDK that reads
+that form to enforce the constraint. A route is unusable when one of its constraints is refused,
+when its constraints hold more than two variable quantifiers in total, when one segment holds more
+than one constrained parameter or more than two variable quantifiers, when its ambiguity degree
+exceeds one (`/{a}{b}/{c}{d}` is refused, `/{a}{b}/{c}` is accepted), or when it holds more than one
+REST segment (`**`, `*name`, `:name*`, `:name+` or `[...name]`). An unusable route masks, as
+`/[redacted]`, every path with the same shape; other paths are unaffected.
+
+A path that cannot be decoded (a malformed escape such as `%ZZ`, or invalid UTF-8 once decoded) is
+masked as `/[redacted]` while a route is configured. Set `TAKT_REDACT_UNDECODABLE_PATHS=false` to
+match such a path like any other on server-side events: it is then sent as the template it matches,
+and raw only when no route matches. The browser snippet keeps masking it, since the browser SDK has
+no such option.
 
 ```php
 'mode' => 'sdk',

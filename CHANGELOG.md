@@ -1,5 +1,17 @@
 # vskstudio/takt-laravel
 
+## Unreleased
+
+### Minor Changes
+
+- `TAKT_REDACT_UNDECODABLE_PATHS` (`redact_undecodable_paths`, default `true`)
+  is passed to the server-side `Takt` client as its `redactUndecodablePaths`
+  argument. `false` matches a path that cannot be decoded like any other instead
+  of masking it as `/[redacted]`. The browser snippet is unaffected.
+- The route redaction documentation describes the constraint grammar, the
+  REST segment and ambiguity limits, and the unusable-route masking of
+  `takt-core-php`.
+
 ## 0.6.0
 
 ### Minor Changes
