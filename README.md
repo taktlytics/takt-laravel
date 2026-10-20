@@ -183,12 +183,14 @@ The service provider registers exactly two services:
 
 ## Dependency audit exemption (Laravel 10 and 11)
 
-The CI matrix runs `composer audit` after resolving dependencies, and blocks on any advisory. Laravel 12 is audited that way. The Laravel 10.x and 11.x cells set `audit.block-insecure false` instead, because every release of those lines is covered by advisories that have no patched version:
+The Laravel 12 cells run `composer audit` after resolving dependencies, and block on any advisory. The Laravel 10.x and 11.x cells set `audit.block-insecure false` instead, because no patched version exists for the advisories that affect those lines:
 
-- Laravel 11.x: `laravel/framework` 11.0.0 through 11.57.0 are all flagged. The advisories reported in CI are `PKSA-d5tc-s1qs-h781`, `PKSA-m5cs-t1y6-qpcs`, `PKSA-3r5d-mb8f-1qw9`, `PKSA-mdq4-51ck-6kdq`, `PKSA-8qx3-n5y5-vvnd`, `PKSA-q46n-4fdk-zjr4`, `PKSA-qzrn-rnz3-85w1` and `PKSA-w7xr-vk7n-rstm`.
+- Laravel 11.x: `laravel/framework` 11.0.0 through 11.57.0 are all covered by advisories that no 11.x release fixes. The four that apply to 11.57.0 are `PKSA-d5tc-s1qs-h781`, `PKSA-m5cs-t1y6-qpcs`, `PKSA-3r5d-mb8f-1qw9` and `PKSA-mdq4-51ck-6kdq`, each fixed only in a 12.x or 13.x line.
 - Laravel 10.x: the line is end of life and carries framework advisories with no patched 10.x release.
 
 Because no fixed release exists, `composer update` cannot resolve a clean set for these lines, so the exemption is what lets the cells test the code at all. The exemption is limited to these two lines and will be removed as soon as a patched release is published for them, or when Laravel 10 and 11 are dropped from the matrix.
+
+The committed `config.platform.php` value of `8.2.99` also applies locally, so `composer.lock` is resolved for PHP 8.2. CI overrides it per cell with the PHP version of that cell.
 
 ## License
 

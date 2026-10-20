@@ -45,8 +45,6 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      # Laravel 10.x and 11.x carry framework-level advisories with no patched release
-      # on those lines; the audit stays blocking for Laravel 12.
       - run: composer config platform.php "${{ matrix.php }}.99"
       - if: matrix.laravel != '12.*'
         run: composer config audit.block-insecure false
