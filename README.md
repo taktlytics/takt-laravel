@@ -35,7 +35,7 @@ This writes `config/takt.php`. All values are environment-driven:
 | Env variable             | Default                     | Description                                                              |
 | ------------------------ | --------------------------- | ------------------------------------------------------------------------ |
 | `TAKT_DOMAIN`            | `''`                        | The site/domain registered in Takt that data is attributed to.           |
-| `TAKT_ENDPOINT`          | `https://taktlytics.com`    | Where events are collected. Defaults to the hosted Takt origin. Both the service origin (`https://taktlytics.com`) and the full collect URL (`https://taktlytics.com/api/event`) are accepted and behave identically; see [Endpoint](#endpoint). |
+| `TAKT_ENDPOINT`          | `https://taktlytics.com`    | Where events are collected, over `https` only. Defaults to the hosted Takt origin. Both the service origin (`https://taktlytics.com`) and the full collect URL (`https://taktlytics.com/api/event`) are accepted and behave identically; see [Endpoint](#endpoint). |
 | `TAKT_SCRIPT_ORIGIN`     | `null`                      | First-party origin to serve the tracker + derive the endpoint from (`{origin}/api/event`): a custom domain you proxy through to dodge ad-blockers (endpoint wins over it). |
 | `TAKT_API_KEY`           | `null`                      | Ingest-scoped API key used for server-side events (see below).           |
 | `TAKT_MODE`              | `inline`                    | Snippet delivery mode: `inline`, `cdn`, `asset`, or `sdk` (full ES-module `init()`, required for `TAKT_SCRUB_URL`). |
@@ -79,6 +79,12 @@ TAKT_ENDPOINT=https://taktlytics.com/api/event
 A value carrying any other path is taken as the collect URL verbatim. That is the case for a
 same-origin first-party proxy (`TAKT_ENDPOINT=/collect`) used to dodge ad-blockers. Leave it unset
 to talk to the hosted Takt service.
+
+The endpoint must be `https`, local development included. Since `takt-core-php` 0.7, an `http://`
+endpoint (`http://localhost:8000` too) or a scheme-less `//host` value is refused, so the API key is
+never sent in clear. The refusal is an `InvalidArgumentException` raised as soon as the `@takt` snippet or the `Takt`
+service is built, so an `http://` value makes the `@takt` directive throw while the page renders.
+Point local development at an `https` collector, or keep `TAKT_ENDPOINT` on the hosted default.
 
 Takt itself is a managed service hosted in Europe; only the `/takt.js` measurement script can be
 served from your own domain (see `asset` mode and `TAKT_SCRIPT_ORIGIN`).
@@ -185,6 +191,12 @@ it into the `@takt` snippet and uses it as the default `route` of every `Takt::p
 `Takt::event()` sent during that request. It suits fully private apps; on a public site it merges
 every article into one row. A request with no matched route keeps its real path, still subject to
 `redact_routes`.
+
+In template mode the referrer is always reduced to its origin, whatever its host, and a referrer
+that is not `http(s)` is dropped. A page URL that cannot be redacted is never sent raw: when the
+route resolver returns nothing or throws, the path is masked as `/[redacted]` (or as the matching
+`redact_routes` pattern), and a URL that cannot be parsed is sent with an empty `u`, which the ingest
+refuses.
 
 Any server-side call can pick its own route template:
 

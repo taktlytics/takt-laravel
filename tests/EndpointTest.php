@@ -72,6 +72,20 @@ final class EndpointTest extends TestCase
         $this->assertSame(Options::HOSTED_ORIGIN, Endpoint::origin(null));
     }
 
+    public function test_plain_http_endpoint_is_refused_by_the_snippet(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->renderedEndpoint('http://localhost:8000');
+    }
+
+    public function test_plain_http_endpoint_is_refused_by_the_server_client(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->serverEndpoint('http://localhost:8000');
+    }
+
     public function test_hosted_default_with_script_origin_lets_the_tracker_derive_first_party(): void
     {
         // L'origine première-partie doit rester déductible : endpoint hébergé par

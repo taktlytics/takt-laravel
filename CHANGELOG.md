@@ -1,5 +1,28 @@
 # vskstudio/takt-laravel
 
+## 0.7.1
+
+### Patch Changes
+
+- Bump `vskstudio/takt-core-php` to 0.7.3, which fixes the browser tracker
+  losing `window.takt` once loaded. The `@takt` inline snippet used to begin
+  with `var takt=(function(exports){...})({})`, which replaced the global
+  `takt`, so `takt('Event')` threw; since takt-core-php 0.6.1, every event after
+  the first pageview was also sent with an empty URL, which the ingest rejects
+  with a 400. Run `composer update vskstudio/takt-core-php`; no configuration
+  change is needed. A regression test fails if the inline bundle reassigns the
+  global again.
+- Documents the `takt-core-php` 0.7 changes this package inherits, which 0.7.0
+  did not list:
+  - The endpoint must be `https`, local development included. A `http://`
+    endpoint (`http://localhost` too) or a scheme-less `//host` value makes the
+    `@takt` directive and the `Takt` service throw an
+    `InvalidArgumentException`, so the API key is never sent in clear.
+  - In template mode (`TAKT_ROUTE_TEMPLATES` / `route_templates`), the referrer
+    is always reduced to its origin, and a referrer that is not `http(s)` is
+    dropped. A page URL whose route cannot be resolved is masked as
+    `/[redacted]` (or the matching `redact_routes` pattern), never sent raw.
+
 ## 0.7.0
 
 ### Minor Changes
