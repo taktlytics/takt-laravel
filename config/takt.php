@@ -1,6 +1,9 @@
 <?php
 
 $redactUndecodablePaths = env('TAKT_REDACT_UNDECODABLE_PATHS');
+if (is_string($redactUndecodablePaths)) {
+    $redactUndecodablePaths = trim($redactUndecodablePaths);
+}
 
 return [
     'domain' => env('TAKT_DOMAIN', ''),
