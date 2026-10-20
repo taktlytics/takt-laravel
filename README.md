@@ -1,7 +1,7 @@
 # Takt for Laravel
 
 
-> 📚 **Documentation** — [taktlytics.com/docs/wrappers/laravel](https://taktlytics.com/docs/wrappers/laravel)
+> 📚 **Documentation**: [taktlytics.com/docs/wrappers/laravel](https://taktlytics.com/docs/wrappers/laravel)
 
 Laravel integration for [Takt](https://github.com/vskstudio) analytics. Drop a single `@takt`
 Blade directive in your layout for privacy-friendly client-side tracking, and use the `Takt`
@@ -35,8 +35,8 @@ This writes `config/takt.php`. All values are environment-driven:
 | Env variable             | Default                     | Description                                                              |
 | ------------------------ | --------------------------- | ------------------------------------------------------------------------ |
 | `TAKT_DOMAIN`            | `''`                        | The site/domain registered in Takt that data is attributed to.           |
-| `TAKT_ENDPOINT`          | `https://taktlytics.com`    | Where events are collected. Defaults to the hosted Takt origin. Both the service origin (`https://taktlytics.com`) and the full collect URL (`https://taktlytics.com/api/event`) are accepted and behave identically — see [Endpoint](#endpoint). |
-| `TAKT_SCRIPT_ORIGIN`     | `null`                      | First-party origin to serve the tracker + derive the endpoint from (`{origin}/api/event`) — a custom domain you proxy through to dodge ad-blockers (endpoint wins over it). |
+| `TAKT_ENDPOINT`          | `https://taktlytics.com`    | Where events are collected. Defaults to the hosted Takt origin. Both the service origin (`https://taktlytics.com`) and the full collect URL (`https://taktlytics.com/api/event`) are accepted and behave identically; see [Endpoint](#endpoint). |
+| `TAKT_SCRIPT_ORIGIN`     | `null`                      | First-party origin to serve the tracker + derive the endpoint from (`{origin}/api/event`): a custom domain you proxy through to dodge ad-blockers (endpoint wins over it). |
 | `TAKT_API_KEY`           | `null`                      | Ingest-scoped API key used for server-side events (see below).           |
 | `TAKT_MODE`              | `inline`                    | Snippet delivery mode: `inline`, `cdn`, `asset`, or `sdk` (full ES-module `init()`, required for `TAKT_SCRUB_URL`). |
 | `TAKT_OUTBOUND`          | `false`                     | Track clicks on outbound links.                                          |
@@ -45,7 +45,7 @@ This writes `config/takt.php`. All values are environment-driven:
 | `TAKT_TAGGED`            | `false`                     | Track elements tagged in HTML with `data-takt-event`.                    |
 | `TAKT_NOT_FOUND`         | `false`                     | Track 404 pageviews.                                                      |
 | `TAKT_EXCLUDE_LOCALHOST` | `true`                      | Skip tracking when running on localhost.                                 |
-| `TAKT_NONCE`             | `null`                      | CSP nonce for the inline `<script>` (request-scoped — see config notes). |
+| `TAKT_NONCE`             | `null`                      | CSP nonce for the inline `<script>` (request-scoped, see config notes). |
 | `TAKT_SAMPLE_RATE`       | `null`                      | Sample a fraction of hits, e.g. `0.5` keeps ~50%. Unset tracks everything. |
 | `TAKT_TRACK_QUERY`       | `null`                      | Keep the raw query string + hash in tracked URLs (default strips them).  |
 | `TAKT_QUERY_PARAMS`      | `''`                        | Comma-separated query params to keep when `TAKT_TRACK_QUERY` is off (e.g. `utm_source,utm_medium`). |
@@ -54,7 +54,7 @@ This writes `config/takt.php`. All values are environment-driven:
 | `TAKT_ENABLED`           | `null`                      | Kill-switch: set to `false` to disable tracking entirely.               |
 | `TAKT_REDACT_ROUTES`     | `''`                        | Comma-separated sensitive routes sent as their pattern (e.g. `/verify/{token},/reset/{code}`). Snippet requires `TAKT_MODE=sdk`. See [Route redaction](#route-redaction). |
 | `TAKT_ROUTE_TEMPLATES`   | `false`                     | Send every page as its Laravel route template (`/users/{id}`). Snippet requires `TAKT_MODE=sdk`. See [Route redaction](#route-redaction). |
-| `TAKT_SCRUB_URL`         | `null`                      | Raw JS function to rewrite URLs before sending, e.g. `(u) => u.split('#')[0]`. **Requires `TAKT_MODE=sdk` and is dev-controlled only** — it is injected verbatim into the page; never build it from user input. |
+| `TAKT_SCRUB_URL`         | `null`                      | Raw JS function to rewrite URLs before sending, e.g. `(u) => u.split('#')[0]`. **Requires `TAKT_MODE=sdk` and is dev-controlled only**. It is injected verbatim into the page; never build it from user input. |
 
 Example `.env`:
 
@@ -75,7 +75,7 @@ TAKT_ENDPOINT=https://taktlytics.com
 TAKT_ENDPOINT=https://taktlytics.com/api/event
 ```
 
-A value carrying any other path is taken as the collect URL verbatim — that is the case for a
+A value carrying any other path is taken as the collect URL verbatim. That is the case for a
 same-origin first-party proxy (`TAKT_ENDPOINT=/collect`) used to dodge ad-blockers. Leave it unset
 to talk to the hosted Takt service.
 
@@ -103,12 +103,12 @@ Add the `@takt` directive to the `<head>` of your layout:
 
 `TAKT_MODE` controls how the tracking script is delivered:
 
-- **`inline`** (default) — the script is embedded directly in the rendered HTML. Zero extra
+- **`inline`** (default): the script is embedded directly in the rendered HTML. Zero extra
   network requests, nothing to host.
-- **`cdn`** — references the script from jsDelivr (`@vskstudio/takt-core`).
-- **`asset`** — references a copy of the script served by your own application from
+- **`cdn`**: references the script from jsDelivr (`@vskstudio/takt-core`).
+- **`asset`**: references a copy of the script served by your own application from
   `/takt/takt.auto.js` (prefixed with `TAKT_SCRIPT_ORIGIN` when set).
-- **`sdk`** — loads the full SDK as an ES module and boots it with `init()`. Required for
+- **`sdk`**: loads the full SDK as an ES module and boots it with `init()`. Required for
   `TAKT_SCRUB_URL` (custom URL rewriting), which cannot be expressed as a data attribute.
 
 ## Server-side events
@@ -133,7 +133,7 @@ referrer as their last arguments (`event(name, props, revenue, url, referrer)`,
 [Route redaction](#route-redaction)).
 
 > **API key scope:** `TAKT_API_KEY` must be an **ingest-scoped** key bound to the configured
-> `TAKT_DOMAIN`. Keep it server-side only — it is never exposed to the browser.
+> `TAKT_DOMAIN`. Keep it server-side only. It is never exposed to the browser.
 
 ## Route redaction
 
