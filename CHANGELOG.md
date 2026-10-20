@@ -1,5 +1,27 @@
 # vskstudio/takt-laravel
 
+## 0.8.0
+
+### Breaking Changes
+
+- The endpoint must be `https`, local development included. `takt-core-php` 0.7 refuses
+  any `http://` endpoint (`http://localhost` too) and any scheme-less `//host` value, so the API
+  key is never sent in clear. `TAKT_ENDPOINT` set to such a value now makes the `@takt` directive
+  and the `Takt` service throw an `InvalidArgumentException`. This was already in effect since
+  0.7.0 and is documented here. Use an `https` collector in development.
+- In template mode (`TAKT_ROUTE_TEMPLATES` / `route_templates`), the referrer is always reduced to
+  its origin, and a referrer that is not `http(s)` is dropped. A page URL whose route cannot be
+  resolved is masked as `/[redacted]` (or the matching `redact_routes` pattern), never sent raw, and
+  a URL that cannot be parsed is sent with an empty `u`, which the ingest refuses. Events that
+  used to carry a raw path or a full cross-host referrer now carry the masked form.
+
+### Patch Changes
+
+- Fix the `@takt` inline snippet replacing `window.takt`. The bundled `takt.auto.js` of
+  `takt-core-php` 0.7.0 assigned the global `takt`, so `takt('Event')` threw and, from the first
+  pageview on, events went out with an empty URL. Requires `vskstudio/takt-core-php` 0.7.3, which
+  ships the fixed bundle (`@vskstudio/takt-core@0.12.3`).
+
 ## 0.7.0
 
 ### Minor Changes
