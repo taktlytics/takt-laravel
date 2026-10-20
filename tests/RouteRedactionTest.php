@@ -35,7 +35,7 @@ final class RouteRedactionTest extends TestCase
 
     public function test_redact_undecodable_paths_stays_on_for_an_empty_or_invalid_value(): void
     {
-        foreach (['', 'enabled', 'maybe', 'true', 'on', '1'] as $value) {
+        foreach (['', 'null', '(null)', 'enabled', 'maybe', 'true', 'on', '1'] as $value) {
             $this->assertTrue($this->redactUndecodablePathsFromEnvironment($value), $value);
         }
     }
