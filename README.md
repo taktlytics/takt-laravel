@@ -181,6 +181,15 @@ The service provider registers exactly two services:
 | `Vskstudio\Takt\SnippetRenderer` | `scoped`    | Built from config once per request scope, so it carries the current route template; resolved by the `@takt` Blade directive. Rebind it per request if you need a fresh CSP nonce. |
 | `Vskstudio\Takt\Takt`            | `scoped`    | Backs the `Takt` facade. **Not** a singleton: it captures the current request's IP/User-Agent, so it is rebuilt on each request scope and never leaks attribution across requests under long-lived workers such as Octane. |
 
+## Dependency audit exemption (Laravel 10 and 11)
+
+The CI matrix runs `composer audit` after resolving dependencies, and blocks on any advisory. Laravel 12 is audited that way. The Laravel 10.x and 11.x cells set `audit.block-insecure false` instead, because every release of those lines is covered by advisories that have no patched version:
+
+- Laravel 11.x: `laravel/framework` 11.0.0 through 11.57.0 are all flagged. The advisories reported in CI are `PKSA-d5tc-s1qs-h781`, `PKSA-m5cs-t1y6-qpcs`, `PKSA-3r5d-mb8f-1qw9`, `PKSA-mdq4-51ck-6kdq`, `PKSA-8qx3-n5y5-vvnd`, `PKSA-q46n-4fdk-zjr4`, `PKSA-qzrn-rnz3-85w1` and `PKSA-w7xr-vk7n-rstm`.
+- Laravel 10.x: the line is end of life and carries framework advisories with no patched 10.x release.
+
+Because no fixed release exists, `composer update` cannot resolve a clean set for these lines, so the exemption is what lets the cells test the code at all. The exemption is limited to these two lines and will be removed as soon as a patched release is published for them, or when Laravel 10 and 11 are dropped from the matrix.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
