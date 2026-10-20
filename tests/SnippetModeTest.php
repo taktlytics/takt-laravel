@@ -18,9 +18,18 @@ final class SnippetModeTest extends TestCase
     {
         $html = $this->renderWithMode('inline');
 
-        $this->assertStringContainsString('var takt=', $html);
+        $this->assertStringContainsString("(function(){'use strict';", $html);
         $this->assertStringNotContainsString('src=', $html);
         $this->assertStringContainsString('data-domain="example.com"', $html);
+    }
+
+    public function test_inline_bundle_does_not_reassign_the_global_takt(): void
+    {
+        $html = $this->renderWithMode('inline');
+
+        $this->assertStringNotContainsString('var takt=', $html);
+        $this->assertStringNotContainsString('window.takt=', $html);
+        $this->assertStringNotContainsString('window.takt =', $html);
     }
 
     public function test_cdn_mode_uses_jsdelivr(): void
