@@ -21,6 +21,44 @@ final class RouteRedactionTest extends TestCase
         $this->assertFalse(config('takt.route_templates'));
     }
 
+    public function test_config_defaults_mask_undecodable_paths(): void
+    {
+        $this->assertTrue(config('takt.redact_undecodable_paths'));
+    }
+
+    public function test_redact_undecodable_paths_reads_false_from_the_environment(): void
+    {
+        foreach (['false', 'off', '0', 'no', ' (false) '] as $value) {
+            $this->assertFalse($this->redactUndecodablePathsFromEnvironment($value), $value);
+        }
+    }
+
+    public function test_redact_undecodable_paths_stays_on_for_an_empty_or_invalid_value(): void
+    {
+        foreach (['', ' ', 'null', '(null)', ' (null) ', 'enabled', 'maybe', 'true', ' (true) ', 'on', '1'] as $value) {
+            $this->assertTrue($this->redactUndecodablePathsFromEnvironment($value), $value);
+        }
+    }
+
+    public function test_redact_undecodable_paths_stays_on_when_unset(): void
+    {
+        $this->assertTrue($this->redactUndecodablePathsFromEnvironment(null));
+    }
+
+    private function redactUndecodablePathsFromEnvironment(?string $value): bool
+    {
+        if ($value === null) {
+            putenv('TAKT_REDACT_UNDECODABLE_PATHS');
+        } else {
+            putenv("TAKT_REDACT_UNDECODABLE_PATHS={$value}");
+        }
+        try {
+            return (require __DIR__.'/../config/takt.php')['redact_undecodable_paths'];
+        } finally {
+            putenv('TAKT_REDACT_UNDECODABLE_PATHS');
+        }
+    }
+
     public function test_sdk_snippet_carries_redact_routes(): void
     {
         $this->useSdk();
@@ -91,6 +129,24 @@ final class RouteRedactionTest extends TestCase
         $takt = $this->app->make(Takt::class);
 
         $this->assertSame(['/verify/{token}'], (new \ReflectionProperty($takt, 'redactRoutes'))->getValue($takt));
+    }
+
+    public function test_server_client_receives_redact_undecodable_paths(): void
+    {
+        $this->app['config']->set('takt.redact_undecodable_paths', false);
+
+        $takt = $this->app->make(Takt::class);
+
+        $this->assertFalse((new \ReflectionProperty($takt, 'redactUndecodablePaths'))->getValue($takt));
+    }
+
+    public function test_server_client_masks_undecodable_paths_when_the_setting_is_missing(): void
+    {
+        $this->app['config']->set('takt.redact_undecodable_paths', null);
+
+        $takt = $this->app->make(Takt::class);
+
+        $this->assertTrue((new \ReflectionProperty($takt, 'redactUndecodablePaths'))->getValue($takt));
     }
 
     public function test_server_client_defaults_to_the_current_route_when_route_templates_is_on(): void

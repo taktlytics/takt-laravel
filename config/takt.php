@@ -1,5 +1,10 @@
 <?php
 
+$redactUndecodablePaths = env('TAKT_REDACT_UNDECODABLE_PATHS');
+if (is_string($redactUndecodablePaths)) {
+    $redactUndecodablePaths = trim($redactUndecodablePaths, " \t()");
+}
+
 return [
     'domain' => env('TAKT_DOMAIN', ''),
     // Où sont collectés les événements. L'origine du service
@@ -52,4 +57,5 @@ return [
     'scrub_url' => env('TAKT_SCRUB_URL'),
     'redact_routes' => array_filter(array_map('trim', explode(',', (string) env('TAKT_REDACT_ROUTES', '')))),
     'route_templates' => (bool) env('TAKT_ROUTE_TEMPLATES', false),
+    'redact_undecodable_paths' => $redactUndecodablePaths === null || $redactUndecodablePaths === '' ? true : (filter_var($redactUndecodablePaths, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true),
 ];

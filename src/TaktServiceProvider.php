@@ -47,7 +47,7 @@ final class TaktServiceProvider extends ServiceProvider
         // long-lived workers such as Octane.
         $this->app->scoped(Takt::class, function ($app) {
             $c = $app['config']['takt'];
-            $takt = new Takt(Endpoint::origin($c['endpoint']), $c['domain'], $c['api_key'], redactRoutes: self::routeList($c['redact_routes'] ?? []));
+            $takt = new Takt(Endpoint::origin($c['endpoint']), $c['domain'], $c['api_key'], redactRoutes: self::routeList($c['redact_routes'] ?? []), redactUndecodablePaths: $c['redact_undecodable_paths'] ?? true);
             $request = $app['request'] ?? null;
             if ($request !== null) {
                 $takt = $takt->withVisitor($request->ip(), $request->userAgent());
