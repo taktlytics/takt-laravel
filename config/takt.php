@@ -10,7 +10,7 @@ return [
     // (proxy première-partie, ex. "/collect") est utilisée telle quelle.
     'endpoint' => env('TAKT_ENDPOINT', 'https://taktlytics.com'),
     // First-party origin to serve the tracker + derive the endpoint from
-    // ({origin}/api/event) — a custom domain you proxy through to dodge
+    // ({origin}/api/event): a custom domain you proxy through to dodge
     // ad-blockers (endpoint wins over it).
     'script_origin' => env('TAKT_SCRIPT_ORIGIN'),
     'api_key' => env('TAKT_API_KEY'),
@@ -40,14 +40,14 @@ return [
     // env, e.g. "utm_source,utm_medium").
     'query_params' => array_filter(array_map('trim', explode(',', (string) env('TAKT_QUERY_PARAMS', '')))),
     // Path prefixes never tracked (comma-separated env, e.g. "/app,/account").
-    // Requires mode=sdk — the minimal snippet can't express it.
+    // Requires mode=sdk. The minimal snippet can't express it.
     'exclude' => array_filter(array_map('trim', explode(',', (string) env('TAKT_EXCLUDE', '')))),
     // Set to false to stop honoring the browser Do-Not-Track header.
     'respect_dnt' => env('TAKT_RESPECT_DNT'),
     // Kill-switch: set to false to disable tracking entirely.
     'enabled' => env('TAKT_ENABLED'),
     // Raw JS function to rewrite URLs before they are sent, e.g.
-    // "(u) => u.split('#')[0]". Requires mode=sdk and is DEV-CONTROLLED ONLY —
+    // "(u) => u.split('#')[0]". Requires mode=sdk and is DEV-CONTROLLED ONLY:
     // it is injected verbatim into the page; never build it from user input.
     'scrub_url' => env('TAKT_SCRUB_URL'),
     'redact_routes' => array_filter(array_map('trim', explode(',', (string) env('TAKT_REDACT_ROUTES', '')))),
