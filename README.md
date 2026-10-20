@@ -181,6 +181,17 @@ The service provider registers exactly two services:
 | `Vskstudio\Takt\SnippetRenderer` | `scoped`    | Built from config once per request scope, so it carries the current route template; resolved by the `@takt` Blade directive. Rebind it per request if you need a fresh CSP nonce. |
 | `Vskstudio\Takt\Takt`            | `scoped`    | Backs the `Takt` facade. **Not** a singleton: it captures the current request's IP/User-Agent, so it is rebuilt on each request scope and never leaks attribution across requests under long-lived workers such as Octane. |
 
+## Dependency audit exemption (Laravel 10 and 11)
+
+The Laravel 12 cells run `composer audit` after resolving dependencies, and block on any advisory. The Laravel 10.x and 11.x cells set `audit.block-insecure false` instead, because no patched version exists for the advisories that affect those lines:
+
+- Laravel 11.x: `laravel/framework` 11.0.0 through 11.57.0 are all covered by advisories that no 11.x release fixes. The four that apply to 11.57.0 are `PKSA-d5tc-s1qs-h781`, `PKSA-m5cs-t1y6-qpcs`, `PKSA-3r5d-mb8f-1qw9` and `PKSA-mdq4-51ck-6kdq`, each fixed only in a 12.x or 13.x line.
+- Laravel 10.x: the line is end of life and carries framework advisories with no patched 10.x release.
+
+Because no fixed release exists, `composer update` cannot resolve a clean set for these lines, so the exemption is what lets the cells test the code at all. The exemption is limited to these two lines and will be removed as soon as a patched release is published for them, or when Laravel 10 and 11 are dropped from the matrix.
+
+The committed `config.platform.php` value of `8.2.99` also applies locally, so `composer.lock` is resolved for PHP 8.2. CI overrides it per cell with the PHP version of that cell.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
