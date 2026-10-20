@@ -28,14 +28,14 @@ final class RouteRedactionTest extends TestCase
 
     public function test_redact_undecodable_paths_reads_false_from_the_environment(): void
     {
-        foreach (['false', 'off', '0', 'no'] as $value) {
+        foreach (['false', 'off', '0', 'no', ' (false) '] as $value) {
             $this->assertFalse($this->redactUndecodablePathsFromEnvironment($value), $value);
         }
     }
 
     public function test_redact_undecodable_paths_stays_on_for_an_empty_or_invalid_value(): void
     {
-        foreach (['', ' ', 'null', '(null)', 'enabled', 'maybe', 'true', 'on', '1'] as $value) {
+        foreach (['', ' ', 'null', '(null)', ' (null) ', 'enabled', 'maybe', 'true', ' (true) ', 'on', '1'] as $value) {
             $this->assertTrue($this->redactUndecodablePathsFromEnvironment($value), $value);
         }
     }

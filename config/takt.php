@@ -2,7 +2,7 @@
 
 $redactUndecodablePaths = env('TAKT_REDACT_UNDECODABLE_PATHS');
 if (is_string($redactUndecodablePaths)) {
-    $redactUndecodablePaths = trim($redactUndecodablePaths);
+    $redactUndecodablePaths = trim($redactUndecodablePaths, " \t()");
 }
 
 return [
