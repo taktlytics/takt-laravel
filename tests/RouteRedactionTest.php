@@ -28,15 +28,34 @@ final class RouteRedactionTest extends TestCase
 
     public function test_redact_undecodable_paths_reads_false_from_the_environment(): void
     {
-        foreach (['false', 'off'] as $value) {
-            putenv("TAKT_REDACT_UNDECODABLE_PATHS={$value}");
-            try {
-                $config = require __DIR__.'/../config/takt.php';
-            } finally {
-                putenv('TAKT_REDACT_UNDECODABLE_PATHS');
-            }
+        foreach (['false', 'off', '0', 'no'] as $value) {
+            $this->assertFalse($this->redactUndecodablePathsFromEnvironment($value), $value);
+        }
+    }
 
-            $this->assertFalse($config['redact_undecodable_paths'], $value);
+    public function test_redact_undecodable_paths_stays_on_for_an_empty_or_invalid_value(): void
+    {
+        foreach (['', 'enabled', 'maybe', 'true', 'on', '1'] as $value) {
+            $this->assertTrue($this->redactUndecodablePathsFromEnvironment($value), $value);
+        }
+    }
+
+    public function test_redact_undecodable_paths_stays_on_when_unset(): void
+    {
+        $this->assertTrue($this->redactUndecodablePathsFromEnvironment(null));
+    }
+
+    private function redactUndecodablePathsFromEnvironment(?string $value): bool
+    {
+        if ($value === null) {
+            putenv('TAKT_REDACT_UNDECODABLE_PATHS');
+        } else {
+            putenv("TAKT_REDACT_UNDECODABLE_PATHS={$value}");
+        }
+        try {
+            return (require __DIR__.'/../config/takt.php')['redact_undecodable_paths'];
+        } finally {
+            putenv('TAKT_REDACT_UNDECODABLE_PATHS');
         }
     }
 

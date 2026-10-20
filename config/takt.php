@@ -52,5 +52,5 @@ return [
     'scrub_url' => env('TAKT_SCRUB_URL'),
     'redact_routes' => array_filter(array_map('trim', explode(',', (string) env('TAKT_REDACT_ROUTES', '')))),
     'route_templates' => (bool) env('TAKT_ROUTE_TEMPLATES', false),
-    'redact_undecodable_paths' => filter_var(env('TAKT_REDACT_UNDECODABLE_PATHS', true), FILTER_VALIDATE_BOOLEAN),
+    'redact_undecodable_paths' => env('TAKT_REDACT_UNDECODABLE_PATHS', '') === '' ? true : (filter_var(env('TAKT_REDACT_UNDECODABLE_PATHS'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true),
 ];
