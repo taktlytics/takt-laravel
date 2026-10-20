@@ -45,14 +45,15 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      # Laravel 10.x is EOL and carries framework-level advisories with no patched
-      # 10.x release; don't let the audit gate block resolution of supported versions.
-      - if: matrix.laravel == '10.*'
+      # Laravel 10.x and 11.x carry framework-level advisories with no patched release
+      # on those lines; the audit stays blocking for Laravel 12.
+      - run: composer config platform.php "${{ matrix.php }}.99"
+      - if: matrix.laravel != '12.*'
         run: composer config audit.block-insecure false
       - run: composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
       - run: composer update --no-interaction --no-progress
       - name: Audit des dépendances résolues
-        if: matrix.laravel != '10.*'
+        if: matrix.laravel == '12.*'
         run: composer audit
       - run: vendor/bin/phpunit
       - run: vendor/bin/phpstan analyse
